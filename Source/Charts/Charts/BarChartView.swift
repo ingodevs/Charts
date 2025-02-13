@@ -33,29 +33,29 @@ open class BarChartView: BarLineChartViewBase, BarChartDataProvider
         self.xAxis.spaceMax = 0.5
     }
     
-    internal override func calcMinMax()
-    {
-        guard let data = self.data as? BarChartData
-            else { return }
+    internal override func calcMinMax() {
+        guard let data = self.data as? BarChartData else { return }
         
-        if fitBars
-        {
+        // Add padding above the max value
+        let extraTopPadding: CGFloat = 40.0 // Adjust this value to control the space above the bars
+        
+        if fitBars {
             xAxis.calculate(
                 min: data.xMin - data.barWidth / 2.0,
-                max: data.xMax + data.barWidth / 2.0)
-        }
-        else
-        {
+                max: data.xMax + data.barWidth / 2.0
+            )
+        } else {
             xAxis.calculate(min: data.xMin, max: data.xMax)
         }
         
-        // calculate axis range (min / max) according to provided data
-        leftAxis.calculate(
-            min: data.getYMin(axis: .left),
-            max: data.getYMax(axis: .left))
-        rightAxis.calculate(
-            min: data.getYMin(axis: .right),
-            max: data.getYMax(axis: .right))
+        // calculate axis range (min / max) according to provided data with extra space on top
+        let maxY = data.getYMax(axis: .left) + extraTopPadding
+        let minY = data.getYMin(axis: .left)
+        leftAxis.calculate(min: minY, max: maxY)
+        
+        let maxRightY = data.getYMax(axis: .right) + extraTopPadding
+        let minRightY = data.getYMin(axis: .right)
+        rightAxis.calculate(min: minRightY, max: maxRightY)
     }
     
     /// - Returns: The Highlight object (contains x-index and DataSet index) of the selected value at the given touch point inside the BarChart.
