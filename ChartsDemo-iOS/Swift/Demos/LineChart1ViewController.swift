@@ -111,7 +111,7 @@ class LineChart1ViewController: DemoBaseViewController {
     func setDataCount(_ count: Int, range: UInt32) {
         let values = (0..<count).map { (i) -> ChartDataEntry in
             let val = Double(arc4random_uniform(range) + 3)
-            return ChartDataEntry(x: Double(i), y: val, icon: #imageLiteral(resourceName: "icon"))
+            return ChartDataEntry(x: Double(i), y: -val, icon: #imageLiteral(resourceName: "icon"))
         }
 
         let set1 = LineChartDataSet(entries: values, label: "DataSet 1")

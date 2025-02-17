@@ -367,7 +367,12 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
 
                 context.setFillColor(dataSet.barShadowColor.cgColor)
-                let path = UIBezierPath(roundedRect: barRect, byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: 5, height: 5))
+                
+                let isPositive = barRect.origin.y > 0
+
+                // Determine the corners to round based on the value
+                let roundingCorners: UIRectCorner = isPositive ? [.topLeft, .topRight] : [.bottomLeft, .bottomRight]
+                let path = UIBezierPath(roundedRect: barRect, byRoundingCorners: roundingCorners, cornerRadii: CGSize(width: 5, height: 5))
                 context.addPath(path.cgPath)
                 context.fillPath()
             }
@@ -399,10 +404,22 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                     // Save the context state before applying the gradient
                     context.saveGState()
 
-                    // Clip the context to the bar's path (rounded rect)
-                    let path = UIBezierPath(roundedRect: barRect, byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: 5, height: 5))
+                    // Get the corresponding data entry
+                    guard let entry = dataSet.entryForIndex(j) as? BarChartDataEntry else { continue }
+
+                    // Check if the value is positive or negative
+                    let isPositive = entry.y >= 0
+
+                    // Determine the corners to round based on the value
+                    let roundingCorners: UIRectCorner = isPositive ? [.topLeft, .topRight] : [.bottomLeft, .bottomRight]
+
+                    // Save the current state before clipping
+                    context.saveGState()
+
+                    // Create the path with the desired rounded corners
+                    let path = UIBezierPath(roundedRect: barRect, byRoundingCorners: roundingCorners, cornerRadii: CGSize(width: 5, height: 5))
                     context.addPath(path.cgPath)
-                    context.clip()  // Clip to the path
+                    context.clip()  // Clip only for this bar
 
                     // Draw the gradient within the bounds of the bar
                     let startPoint = CGPoint(x: barRect.origin.x, y: barRect.origin.y)
@@ -416,12 +433,29 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 }
                 else
                 {
-                    // Fallback for single color bars (if no gradient is needed)
-                    context.setFillColor(dataSet.color(atIndex: j).cgColor)
+                    // Get the corresponding data entry
+                    guard let entry = dataSet.entryForIndex(j) as? BarChartDataEntry else { continue }
                     
-                    let path = UIBezierPath(roundedRect: barRect, byRoundingCorners: [.topLeft, .topRight], cornerRadii: CGSize(width: 5, height: 5))
+                    // Check if the value is positive or negative
+                    let isPositive = entry.y >= 0
+                    
+                    // Determine the corners to round based on the value
+                    let roundingCorners: UIRectCorner = isPositive ? [.topLeft, .topRight] : [.bottomLeft, .bottomRight]
+                    
+                    // Save the context state before drawing the bar
+                    context.saveGState()
+                    
+                    // Create the path with the desired rounded corners
+                    let path = UIBezierPath(roundedRect: barRect, byRoundingCorners: roundingCorners, cornerRadii: CGSize(width: 5, height: 5))
                     context.addPath(path.cgPath)
-                    context.fillPath()
+                    context.clip()  // Clip only for this bar
+                    
+                    // Set the fill color and draw the bar
+                    context.setFillColor(dataSet.color(atIndex: j).cgColor)
+                    context.fill(barRect)
+                    
+                    // Restore the context state for the next bar
+                    context.restoreGState()
                 }
             
             if drawBorder
