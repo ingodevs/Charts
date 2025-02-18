@@ -97,4 +97,14 @@ open class DefaultAxisValueFormatter: NSObject, AxisValueFormatter
             return formatter?.string(from: NSNumber(floatLiteral: value)) ?? ""
         }
     }
+    
+    
+    open func stringForMarker(_ value: Double, axis: AxisBase?) -> String {
+        
+        if let block = block {
+            return block(value, axis)
+        } else {
+            return formatter?.string(from: NSNumber(floatLiteral: value)) ?? ""
+        }
+    }
 }

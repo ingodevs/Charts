@@ -27,4 +27,7 @@ public protocol AxisValueFormatter: AnyObject
     func stringForValue(_ value: Double,
                         axis: AxisBase?) -> String
     
+    func stringForMarker(_ value: Double,
+                         axis: AxisBase?) -> String
+    
 }

@@ -20,4 +20,8 @@ public class DateValueFormatter: NSObject, AxisValueFormatter {
     public func stringForValue(_ value: Double, axis: AxisBase?) -> String {
         return dateFormatter.string(from: Date(timeIntervalSince1970: value))
     }
+    
+    public func stringForMarker(_ value: Double, axis: AxisBase?) -> String {
+        return dateFormatter.string(from: Date(timeIntervalSince1970: value))
+    }
 }

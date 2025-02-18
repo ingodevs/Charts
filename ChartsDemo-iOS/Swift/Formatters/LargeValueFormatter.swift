@@ -48,6 +48,10 @@ public class LargeValueFormatter: NSObject, ValueFormatter, AxisValueFormatter {
         return format(value: value)
     }
     
+    public func stringForMarker(_ value: Double, axis: AxisBase?) -> String {
+        return format(value: value)
+    }
+    
     public func stringForValue(
         _ value: Double,
         entry: ChartDataEntry,

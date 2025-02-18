@@ -235,4 +235,7 @@ extension CombinedChartViewController: AxisValueFormatter {
     func stringForValue(_ value: Double, axis: AxisBase?) -> String {
         return months[Int(value) % months.count]
     }
+    func stringForMarker(_ value: Double, axis: AxisBase?) -> String {
+        return months[Int(value) % months.count]
+    }
 }

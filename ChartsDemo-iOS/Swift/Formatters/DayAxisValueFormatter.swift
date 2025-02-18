@@ -46,6 +46,32 @@ public class DayAxisValueFormatter: NSObject, AxisValueFormatter {
         }
     }
     
+    public func stringForMarker(_ value: Double, axis: AxisBase?) -> String {
+        let days = Int(value)
+        let year = determineYear(forDays: days)
+        let month = determineMonth(forDayOfYear: days)
+        
+        let monthName = months[month % months.count]
+        let yearName = "\(year)"
+        
+        if let chart = chart,
+            chart.visibleXRange > 30 * 6 {
+            return monthName + yearName
+        } else {
+            let dayOfMonth = determineDayOfMonth(forDays: days, month: month + 12 * (year - 2016))
+            var appendix: String
+            
+            switch dayOfMonth {
+            case 1, 21, 31: appendix = "st"
+            case 2, 22: appendix = "nd"
+            case 3, 23: appendix = "rd"
+            default: appendix = "th"
+            }
+            
+            return dayOfMonth == 0 ? "" : String(format: "%d\(appendix) \(monthName)", dayOfMonth)
+        }
+    }
+    
     private func days(forMonth month: Int, year: Int) -> Int {
         // month is 0-based
         switch month {

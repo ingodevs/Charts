@@ -42,4 +42,12 @@ open class IndexAxisValueFormatter: NSObject, AxisValueFormatter
         guard values.indices.contains(index), index == Int(value) else { return "" }
         return values[index]
     }
+    
+    open func stringForMarker(_ value: Double,
+                             axis: AxisBase?) -> String
+    {
+        let index = Int(value.rounded())
+        guard values.indices.contains(index), index == Int(value) else { return "" }
+        return values[index]
+    }
 }

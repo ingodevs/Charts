@@ -131,4 +131,8 @@ extension NegativeStackedBarChartViewController: AxisValueFormatter {
     func stringForValue(_ value: Double, axis: AxisBase?) -> String {
         return String(format: "%03.0f-%03.0f", value, value + 10)
     }
+    
+    func stringForMarker(_ value: Double, axis: AxisBase?) -> String {
+        return String(format: "%03.0f-%03.0f", value, value + 10)
+    }
 }

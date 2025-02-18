@@ -175,4 +175,7 @@ extension RadarChartViewController: AxisValueFormatter {
     func stringForValue(_ value: Double, axis: AxisBase?) -> String {
         return activities[Int(value) % activities.count]
     }
+    func stringForMarker(_ value: Double, axis: AxisBase?) -> String {
+        return activities[Int(value) % activities.count]
+    }
 }
