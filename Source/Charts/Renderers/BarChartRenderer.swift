@@ -388,7 +388,7 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         // In case the chart is stacked, we need to accomodate individual bars within accessibilityOrdereredElements
         let isStacked = dataSet.isStacked
         let stackSize = isStacked ? dataSet.stackSize : 1
-
+        
         for j in buffer.indices {
             let barRect = buffer[j]
 
@@ -400,11 +400,22 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
             let isSingleColor = dataSet.colors.count == 1 // Check if dataset uses a single color
             let barColor = dataSet.color(atIndex: j).cgColor // Fetch color for current bar
 
+            // Determine which corners to round
+            guard let entry = dataSet.entryForIndex(j) as? BarChartDataEntry else { continue }
+            let isPositive = entry.y >= 0
+            let roundingCorners: UIRectCorner = isPositive ? [.topLeft, .topRight] : [.bottomLeft, .bottomRight]
+
+            // Clip for rounded corners
+            let path = UIBezierPath(roundedRect: barRect, byRoundingCorners: roundingCorners, cornerRadii: CGSize(width: 5, height: 5))
+            context.addPath(path.cgPath)
+            context.clip()
+
             if isSingleColor {
+                // Fill with a single color
                 context.setFillColor(barColor)
                 context.fill(barRect)
             } else {
-
+                // Apply gradient fill
                 let colorSpace = CGColorSpaceCreateDeviceRGB()
                 let locations: [CGFloat] = [0.0, 0.5, 1.0] // Uniform gradient
                 guard let gradient = CGGradient(colorsSpace: colorSpace, colors: dataSet.colors.map({ $0.cgColor }) as CFArray, locations: locations) else { continue }
@@ -412,20 +423,10 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 let startPoint = CGPoint(x: barRect.midX, y: barRect.minY) // Top
                 let endPoint = CGPoint(x: barRect.midX, y: barRect.maxY)   // Bottom
 
-                // Clip for rounded corners
-                guard let entry = dataSet.entryForIndex(j) as? BarChartDataEntry else { continue }
-                let isPositive = entry.y >= 0
-                let roundingCorners: UIRectCorner = isPositive ? [.topLeft, .topRight] : [.bottomLeft, .bottomRight]
-
-                context.saveGState() // Save before clipping
-                let path = UIBezierPath(roundedRect: barRect, byRoundingCorners: roundingCorners, cornerRadii: CGSize(width: 5, height: 5))
-                context.addPath(path.cgPath)
-                context.clip()
-
                 context.drawLinearGradient(gradient, start: startPoint, end: endPoint, options: .drawsBeforeStartLocation)
-
-                context.restoreGState() // Restore after clipping
             }
+
+            context.restoreGState() // Restore after clipping
 
             if drawBorder {
                 context.setStrokeColor(borderColor.cgColor)
@@ -445,8 +446,6 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 }
                 accessibilityOrderedElements[j/stackSize].append(element)
             }
-
-            context.restoreGState() // Restore final state
         }
     }
     
