@@ -391,47 +391,40 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
 
         for j in buffer.indices {
             let barRect = buffer[j]
-            
+
             guard viewPortHandler.isInBoundsLeft(barRect.origin.x + barRect.size.width) else { continue }
             guard viewPortHandler.isInBoundsRight(barRect.origin.x) else { break }
 
-            context.saveGState() // Save before modifying the state
+            context.saveGState() // Save before modifying
 
-            if !isSingleColor {
-                let gradient = createGradient(for: barRect, context: context, dataSet: dataSet, index: j)
+            let isSingleColor = dataSet.colors.count == 1 // Check if dataset uses a single color
+            let barColor = dataSet.color(atIndex: j).cgColor // Fetch color for current bar
 
-                context.saveGState() // Save before clipping
+            if isSingleColor {
+                context.setFillColor(barColor)
+                context.fill(barRect)
+            } else {
 
+                let colorSpace = CGColorSpaceCreateDeviceRGB()
+                let locations: [CGFloat] = [0.0, 0.5, 1.0] // Uniform gradient
+                guard let gradient = CGGradient(colorsSpace: colorSpace, colors: dataSet.colors.map({ $0.cgColor }) as CFArray, locations: locations) else { continue }
+
+                let startPoint = CGPoint(x: barRect.midX, y: barRect.minY) // Top
+                let endPoint = CGPoint(x: barRect.midX, y: barRect.maxY)   // Bottom
+
+                // Clip for rounded corners
                 guard let entry = dataSet.entryForIndex(j) as? BarChartDataEntry else { continue }
                 let isPositive = entry.y >= 0
                 let roundingCorners: UIRectCorner = isPositive ? [.topLeft, .topRight] : [.bottomLeft, .bottomRight]
 
-                // Create a rounded bar path and clip to it
+                context.saveGState() // Save before clipping
                 let path = UIBezierPath(roundedRect: barRect, byRoundingCorners: roundingCorners, cornerRadii: CGSize(width: 5, height: 5))
                 context.addPath(path.cgPath)
                 context.clip()
 
-                // Apply the gradient
-                let startPoint = CGPoint(x: barRect.origin.x, y: barRect.origin.y)
-                let endPoint = CGPoint(x: barRect.origin.x, y: barRect.origin.y + barRect.size.height)
                 context.drawLinearGradient(gradient, start: startPoint, end: endPoint, options: .drawsBeforeStartLocation)
 
-                context.restoreGState() // Restore AFTER gradient to remove clipping
-            } else {
-                guard let entry = dataSet.entryForIndex(j) as? BarChartDataEntry else { continue }
-                let isPositive = entry.y >= 0
-                let roundingCorners: UIRectCorner = isPositive ? [.topLeft, .topRight] : [.bottomLeft, .bottomRight]
-
-                context.saveGState() // Save before clipping
-
-                let path = UIBezierPath(roundedRect: barRect, byRoundingCorners: roundingCorners, cornerRadii: CGSize(width: 5, height: 5))
-                context.addPath(path.cgPath)
-                context.clip()
-
-                context.setFillColor(dataSet.color(atIndex: j).cgColor)
-                context.fill(barRect)
-
-                context.restoreGState() // Restore after fill
+                context.restoreGState() // Restore after clipping
             }
 
             if drawBorder {
@@ -440,7 +433,6 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 context.stroke(barRect)
             }
 
-            // Keep the accessibility code
             if let chart = dataProvider as? BarChartView {
                 let element = createAccessibleElement(
                     withIndex: j,
@@ -454,11 +446,8 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
                 accessibilityOrderedElements[j/stackSize].append(element)
             }
 
-            context.restoreGState() // Restore to avoid persistent clipping issues
+            context.restoreGState() // Restore final state
         }
-
-        // FINAL restore to **ensure axis labels are NOT clipped**
-        context.restoreGState()
     }
     
     open func prepareBarHighlight(
