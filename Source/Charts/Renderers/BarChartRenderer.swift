@@ -401,7 +401,7 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
             } else {
                 // Apply gradient fill
                 let colorSpace = CGColorSpaceCreateDeviceRGB()
-                let locations: [CGFloat] = [0.0, 0.2, 1.0] // Uniform gradient
+                let locations: [CGFloat] = [0.0, 0.5, 1.0] // Uniform gradient
                 guard let gradient = CGGradient(colorsSpace: colorSpace, colors: dataSet.colors.map({ $0.cgColor }) as CFArray, locations: locations) else { continue }
 
                 let startPoint = CGPoint(x: barRect.midX, y: barRect.minY) // Top
