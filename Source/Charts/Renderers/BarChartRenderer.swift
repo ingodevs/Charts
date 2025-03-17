@@ -289,22 +289,6 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
         accessibleChartElements.append(contentsOf: accessibilityOrderedElements.flatMap { $0 } )
         accessibilityPostLayoutChangedNotification()
     }
-
-    func createGradient(for rect: CGRect, context: CGContext, dataSet: BarChartDataSetProtocol, index: Int) -> CGGradient
-    {
-        // Define gradient colors (can be customized based on dataSet or index)
-        let startColor = dataSet.color(atIndex: index).cgColor
-        let endColor = UIColor.red.cgColor  // Change to your desired color
-
-        // Define the color space
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-
-        // Create the gradient
-        let colors = [startColor, endColor] as CFArray
-        let locations: [CGFloat] = [0.0, 1.0]
-        
-        return CGGradient(colorsSpace: colorSpace, colors: colors, locations: locations)!
-    }
     
     private var _barShadowRectBuffer: CGRect = CGRect()
     
@@ -417,7 +401,7 @@ open class BarChartRenderer: BarLineScatterCandleBubbleRenderer
             } else {
                 // Apply gradient fill
                 let colorSpace = CGColorSpaceCreateDeviceRGB()
-                let locations: [CGFloat] = [0.0, 0.2, 1.0] // Uniform gradient
+                let locations: [CGFloat] = [0.0, 0.05, 1.0] // Uniform gradient
                 guard let gradient = CGGradient(colorsSpace: colorSpace, colors: dataSet.colors.map({ $0.cgColor }) as CFArray, locations: locations) else { continue }
 
                 let startPoint = CGPoint(x: barRect.midX, y: barRect.minY) // Top
