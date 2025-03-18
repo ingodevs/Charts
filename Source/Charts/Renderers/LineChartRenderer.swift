@@ -558,6 +558,7 @@ open class LineChartRenderer: LineRadarRenderer
                 for j in _xBounds
                 {
                     guard let e = dataSet.entryForIndex(j) else { break }
+                    if e.y.isNaN { continue }
                     
                     pt.x = CGFloat(e.x)
                     pt.y = CGFloat(e.y * phaseY)
